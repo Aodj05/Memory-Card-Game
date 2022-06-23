@@ -9,7 +9,7 @@ import {
 import Card from './card';
 import './App.css';
 
-const uniqueElentsArray = [
+const uniqueElementsArray = [
   {
     type: 'Pikachu',
     image: require(`./images/Pikachu.png`)
@@ -53,5 +53,38 @@ function shuffleCards(array) {
   return array;
 }
 
+//logic for 3x4 game board and card deck
+export default function App({ uniqueCardsArray }) {
+  const [cards, setCards] = useState(
+    () => shuffleCards(uniqueCardsArray.concat(uniqueCardsArray))
+};
+
+const handleCardClick = (index) => {
+
+};
+
+return (
+  <div className="App">
+    <header>
+      <h3>Memory Card Game</h3>
+      <div>
+        Select two cards that match
+      </div>
+    </header>
+    <div className="container">
+      {cards.map((card, index) => {
+        return(
+        <Card
+          key={index}
+          card={card}
+          index={index}
+          onClick={handleCardClick}
+        />
+      );
+    })}
+  </div>
+</div>
+)
+}
 
 export default App;
