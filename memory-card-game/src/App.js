@@ -59,8 +59,47 @@ export default function App({ uniqueCardsArray }) {
     () => shuffleCards(uniqueCardsArray.concat(uniqueCardsArray))
 };
 
-const handleCardClick = (index) => {
+const [openCards, setOpenCards,] = useState([]);
+const [clearedCards, setClearedCards] = useState({});
+const [moves, setMoves] = useState(0);
+const [showModal, setShowModal] = useState(false);
+const timeout = useRef;
 
+//check to see if cards match if thet do make inactive
+const evaluate = () => {
+  const [first, second] = openCards;
+  if (cards[first].type === cards[second].type) {
+    setClearedCards((prev) => ({...prev, [cards[first].type]: true }));
+    setOpenCards([]);
+    return;
+  }
+  //flip the cards after 500ms
+  timeout.current = setTimeout(() => {
+    setOpenCards([]);
+  }, 500);
+}
+
+const handleCardClick = (index) => {
+  //Only a max of 2 items in the array
+  if (openCards.length === 1) {
+    setOpenCards((prev) => [...prev, index]);
+    //Once paired increase the moves
+    setMoves((moves) =? moves + 1);
+  } else {
+    //Cancel timeout for flipping cards once two are flipped
+    clearTimeout(timeout.current);
+    setOpenCards([index]);
+  }
+};
+
+useEffect(() => {
+  if (openCards.length === 2) {
+    setTimeout(evaluate, 500);
+  }
+}, [openCards]);
+
+const checkIsFlipped = (index) => {
+  return openCards.includes(index);
 };
 
 return (
@@ -78,6 +117,9 @@ return (
           key={index}
           card={card}
           index={index}
+          isDisabled={shouldDisableAllCards}
+          isInactive={checkIsInactive(card)}
+          isFlipped={checkIsFlipped(index)}
           onClick={handleCardClick}
         />
       );
