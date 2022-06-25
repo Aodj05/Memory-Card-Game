@@ -63,7 +63,24 @@ const [openCards, setOpenCards,] = useState([]);
 const [clearedCards, setClearedCards] = useState({});
 const [moves, setMoves] = useState(0);
 const [showModal, setShowModal] = useState(false);
+const [bestScore, setBestScore] = useState(
+  JSON.parse(localStorage,getItem("bestScore")) || Number.POSITIVE_INFINITY
+  );
 const timeout = useRef;
+
+const disable = () => {
+  setShouldDisableAllCards(true);
+};
+const enable = () => {
+  setShouldDisableAllCards(false);
+};
+
+const checkCompletion = () => {
+  //Store clearedCards as object
+  if (Object.keys(clearedCards).length === uniqueCardsArray.length) {
+    setShowModal(true);
+  }
+};
 
 //check to see if cards match if thet do make inactive
 const evaluate = () => {
