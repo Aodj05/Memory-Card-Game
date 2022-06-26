@@ -119,6 +119,16 @@ const checkIsFlipped = (index) => {
   return openCards.includes(index);
 };
 
+const handleRestart = () => {
+  setClearedCards({});
+  setOpenCards({});
+  setShowModal({});
+  setMoves({});
+  setShouldDisableAllCards({});
+  //set shuffled deck
+  setCards(shuffleCards(uniqueElementsArray.concat(uniqueElementsArray)));
+};
+
 return (
   <div className="App">
     <header>
@@ -142,6 +152,23 @@ return (
       );
     })}
   </div>
+  <footer>
+    <div className="score">
+      <div className="moves">
+        <span className="bold">Moves:</span> {bestScore}
+      </div>
+      {localStorage.getItem("bestScore") && (
+        <div> className="high-score">
+          <span className="bold">Best Score:</span> {bestScore}
+        </div>
+        )}
+      </div>
+      <div className"restart">
+        <Button onClick={handleRestart} color="primary" variant="contained">
+          Restart
+        </Button>
+      </div>
+    </footer>
 </div>
 )
 }
