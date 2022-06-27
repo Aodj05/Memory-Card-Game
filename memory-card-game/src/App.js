@@ -11,62 +11,65 @@ import './App.css';
 
 const uniqueElementsArray = [
   {
-    type: 'Pikachu',
-    image: require(`./images/Pikachu.png`)
+    type: 'annoyed',
+    image: require(`./images/annoyed.webp`)
   },
     {
-    type: "ButterFree",
-    image: require(`./images/ButterFree.png`)
+    type: "hat",
+    image: require(`./images/hat.jpg`)
   },
   {
-    type: "Charmander",
-    image: require(`./images/Charmander.png`)
+    type: "point",
+    image: require(`./images/point.jpg`)
   },
   {
-    type: "Squirtle",
-    image: require(`./images/Squirtle.png`)
+    type: "shoot",
+    image: require(`./images/shoot.png`)
   },
   {
-    type: "Pidgetto",
-    image: require(`./images/Pidgetto.png`)
+    type: "thumb",
+    image: require(`./images/thumb.webp`)
   },
   {
-    type: "Bulbasaur",
-    image: require(`./images/Bulbasaur.png`)
+    type: "VaultBoy",
+    image: require(`./images/VaultBoy.webp`)
   }
 ];
 
 //shuffle logic
-function swap(array, i, j) {
+/*function swap(array, i, j) {
   const temp = array[i];
   array[i] = array[j];
   array[j] = temp;
-}
+}*/
 
 function shuffleCards(array) {
   const length = array.length;
   for (let i = length; i > 0; i--) {
     const randomIndex = Math.floor(Math.random() * i);
     const currentIndex = i - 1;
-    swap(array, currIndex, randomIndex)
+    const temp = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temp;
+    //swap(array, currIndex, randomIndex)
   }
   return array;
 }
 
 //logic for 3x4 game board and card deck
-export default function App({ uniqueCardsArray }) {
+export default function App() {
   const [cards, setCards] = useState(
-    () => shuffleCards(uniqueCardsArray.concat(uniqueCardsArray))
-};
-
+    shuffleCards.bind(null, uniqueElementsArray.concat(uniqueElementsArray))
+);
 const [openCards, setOpenCards,] = useState([]);
 const [clearedCards, setClearedCards] = useState({});
+const [ShouldDisableAllCards, setShouldDisableAllCards] = useState(false);
 const [moves, setMoves] = useState(0);
 const [showModal, setShowModal] = useState(false);
 const [bestScore, setBestScore] = useState(
   JSON.parse(localStorage,getItem("bestScore")) || Number.POSITIVE_INFINITY
   );
-const timeout = useRef;
+const timeout = useRef(null);
 
 const disable = () => {
   setShouldDisableAllCards(true);
@@ -79,6 +82,9 @@ const checkCompletion = () => {
   //Store clearedCards as object
   if (Object.keys(clearedCards).length === uniqueCardsArray.length) {
     setShowModal(true);
+    const highScore = Math.min(moves, bestScore);
+    setBestScore(highScore);
+    localStorage.setItem("bestScore", highScore);
   }
 };
 
@@ -94,14 +100,15 @@ const evaluate = () => {
   timeout.current = setTimeout(() => {
     setOpenCards([]);
   }, 500);
-}
+};
 
 const handleCardClick = (index) => {
   //Only a max of 2 items in the array
   if (openCards.length === 1) {
     setOpenCards((prev) => [...prev, index]);
     //Once paired increase the moves
-    setMoves((moves) =? moves + 1);
+    setMoves((moves) => moves + 1);
+    disable();
   } else {
     //Cancel timeout for flipping cards once two are flipped
     clearTimeout(timeout.current);
@@ -110,21 +117,32 @@ const handleCardClick = (index) => {
 };
 
 useEffect(() => {
+  let timeout = null;
   if (openCards.length === 2) {
-    setTimeout(evaluate, 500);
+    timeout = setTimeout(evaluate, 300);
   }
+  return () => {
+    clearTimeout(timeout);
+  };
 }, [openCards]);
 
+useEffect(() => {
+  checkCompletion();
+}, [clearedCards]);
 const checkIsFlipped = (index) => {
   return openCards.includes(index);
+};
+
+const checkIsInactive = (card) => {
+  return Boolean(clearedCards[cards.type]);
 };
 
 const handleRestart = () => {
   setClearedCards({});
   setOpenCards({});
-  setShowModal({});
-  setMoves({});
-  setShouldDisableAllCards({});
+  setShowModal(false);
+  setMoves(0);
+  setShouldDisableAllCards(false);
   //set shuffled deck
   setCards(shuffleCards(uniqueElementsArray.concat(uniqueElementsArray)));
 };
@@ -163,14 +181,34 @@ return (
         </div>
         )}
       </div>
-      <div className"restart">
+      <div className="restart">
         <Button onClick={handleRestart} color="primary" variant="contained">
           Restart
         </Button>
       </div>
     </footer>
+    <Dialog
+      open={showModal}
+      disableBackdropClick
+      disableEscapeKeyDown
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+    >
+    <DialogTitle id="alert-dialog-title">
+      You have Won
+    </DialogTitle>
+    <DialogContent>
+      <DialogContentText id="alert-dialog-description">
+        It took you {moves} to finish. Best score is {" "}
+        {bestScore} moves.
+      </DialogContentText>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={handleRestart} color="primary">
+        Restart
+      </Button>
+    </DialogActions>
+  </Dialog>
 </div>
-)
+);
 }
-
-export default App;
